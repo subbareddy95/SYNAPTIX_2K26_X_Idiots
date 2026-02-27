@@ -1,0 +1,103 @@
+"use client"
+
+import { useState } from "react"
+import useSWR from "swr"
+import { SiteHeader } from "@/components/site-header"
+import { SiteFooter } from "@/components/site-footer"
+import { CandidateProfile } from "@/components/dashboard/candidate-profile"
+import { MatchResultCard } from "@/components/dashboard/match-result-card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
+import { sampleCandidates } from "@/lib/seed-data"
+import type { MatchResult, Candidate } from "@/lib/matching-engine"
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
+export default function DashboardPage() {
+  const [selectedCandidate, setSelectedCandidate] = useState("c1")
+
+  const { data, isLoading } = useSWR<{ results: MatchResult[]; candidate: Candidate }>(
+    `/api/match?type=projects&id=${selectedCandidate}`,
+    fetcher
+  )
+
+  const currentCandidate = sampleCandidates.find((c) => c.id === selectedCandidate)!
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      <main className="flex-1 bg-secondary/20">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+          {/* Page Header */}
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Candidate Dashboard</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                View your skill profile and explore transparent project matches
+              </p>
+            </div>
+            <Select value={selectedCandidate} onValueChange={setSelectedCandidate}>
+              <SelectTrigger className="w-[240px]">
+                <SelectValue placeholder="Select candidate" />
+              </SelectTrigger>
+              <SelectContent>
+                {sampleCandidates.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Tabs defaultValue="matches" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="matches">Project Matches</TabsTrigger>
+              <TabsTrigger value="profile">Skill Profile</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="matches">
+              <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+                {/* Match Results */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Your Top Matches
+                    </h2>
+                    <span className="text-sm text-muted-foreground">
+                      {data?.results.length || 0} projects found
+                    </span>
+                  </div>
+                  {isLoading ? (
+                    <div className="flex flex-col gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-40 w-full rounded-xl" />
+                      ))}
+                    </div>
+                  ) : (
+                    data?.results.map((result) => (
+                      <MatchResultCard key={result.projectId} result={result} mode="candidate" />
+                    ))
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <aside className="hidden lg:block">
+                  <div className="sticky top-24">
+                    <CandidateProfile candidate={currentCandidate} />
+                  </div>
+                </aside>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="profile">
+              <div className="mx-auto max-w-2xl">
+                <CandidateProfile candidate={currentCandidate} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  )
+}
