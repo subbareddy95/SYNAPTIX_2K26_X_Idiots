@@ -186,10 +186,10 @@ export default function RecruiterPage() {
                   <CardContent>
                     {data?.results && data.results.length > 0 && (
                       <div className="flex flex-col gap-4">
-                        {["skillMatch", "experienceMatch", "projectFit", "preferenceMatch"].map((dim) => {
+                        {(["skillMatch", "experienceMatch", "projectFit", "preferenceMatch"] as const).map((dim) => {
                           const avg = Math.round(
                             data.results.reduce(
-                              (a, r) => a + r.score[dim as keyof typeof r.score] as number,
+                              (a, r) => a + (r.score[dim] as number),
                               0
                             ) / data.results.length
                           )
