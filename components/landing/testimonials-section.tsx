@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Quote } from "lucide-react"
+import { Star } from "lucide-react"
 
 const testimonials = [
   {
@@ -27,13 +27,13 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section className="border-t border-border/60 bg-secondary/30 py-20 lg:py-28">
+    <section className="border-t border-border/40 bg-muted/30 py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">
             Testimonials
           </p>
-          <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          <h2 className="mt-3 font-[family-name:var(--font-heading)] text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Loved by candidates and recruiters
           </h2>
         </div>
@@ -42,15 +42,22 @@ export function TestimonialsSection() {
           {testimonials.map((t) => (
             <div
               key={t.name}
-              className="flex flex-col rounded-2xl border border-border/60 bg-card p-7 shadow-sm"
+              className="group flex flex-col rounded-2xl border border-border/60 bg-card p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
             >
-              <Quote className="mb-4 h-8 w-8 text-primary/30" />
+              {/* Stars */}
+              <div className="mb-5 flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-primary/80 text-primary/80" />
+                ))}
+              </div>
+
               <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
                 {`"${t.quote}"`}
               </p>
-              <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
+
+              <div className="mt-8 flex items-center gap-3 border-t border-border/40 pt-6">
                 <Avatar className="h-10 w-10 border border-border">
-                  <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                  <AvatarFallback className="bg-primary/8 text-xs font-semibold text-primary">
                     {t.initials}
                   </AvatarFallback>
                 </Avatar>
