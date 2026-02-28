@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
 
 interface ScoreRingProps {
   score: number
@@ -8,6 +9,7 @@ interface ScoreRingProps {
   strokeWidth?: number
   className?: string
   label?: string
+  animate?: boolean
 }
 
 export function ScoreRing({
@@ -16,23 +18,32 @@ export function ScoreRing({
   strokeWidth = 6,
   className,
   label,
+  animate = true,
 }: ScoreRingProps) {
+  const [rendered, setRendered] = useState(!animate)
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
-  const offset = circumference - (score / 100) * circumference
+  const offset = circumference - ((rendered ? score : 0) / 100) * circumference
+
+  useEffect(() => {
+    if (animate) {
+      const timer = setTimeout(() => setRendered(true), 100)
+      return () => clearTimeout(timer)
+    }
+  }, [animate, score])
 
   const getColor = (s: number) => {
-    if (s >= 85) return "text-[oklch(0.65_0.17_145)]"
+    if (s >= 85) return "text-[oklch(0.60_0.18_145)]"
     if (s >= 70) return "text-primary"
-    if (s >= 55) return "text-[oklch(0.75_0.16_65)]"
+    if (s >= 55) return "text-[oklch(0.72_0.17_65)]"
     return "text-destructive"
   }
 
   const getTrackColor = (s: number) => {
-    if (s >= 85) return "text-[oklch(0.65_0.17_145)]/15"
-    if (s >= 70) return "text-primary/15"
-    if (s >= 55) return "text-[oklch(0.75_0.16_65)]/15"
-    return "text-destructive/15"
+    if (s >= 85) return "text-[oklch(0.60_0.18_145)]/12"
+    if (s >= 70) return "text-primary/12"
+    if (s >= 55) return "text-[oklch(0.72_0.17_65)]/12"
+    return "text-destructive/12"
   }
 
   return (
@@ -55,14 +66,22 @@ export function ScoreRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className={cn("stroke-current transition-all duration-700", getColor(score))}
+          className={cn(
+            "stroke-current",
+            getColor(score)
+          )}
+          style={{
+            transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className={cn("text-lg font-bold", getColor(score))}>{score}</span>
+        <span className={cn("font-[family-name:var(--font-heading)] text-lg font-bold tabular-nums", getColor(score))}>
+          {score}
+        </span>
       </div>
       {label && (
-        <span className="mt-1.5 text-xs text-muted-foreground">{label}</span>
+        <span className="mt-1.5 text-[11px] font-medium text-muted-foreground">{label}</span>
       )}
     </div>
   )
